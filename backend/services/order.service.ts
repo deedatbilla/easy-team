@@ -1,13 +1,12 @@
-import { Order } from "@prisma/client";
+import { Commission, Order } from "@prisma/client";
 import prisma from "../lib/prisma";
+import { GetBatchResult } from "@prisma/client/runtime/library";
 const getOrdersService = async ({
   start,
   end,
-  staffId,
 }: {
   start: string;
   end: string;
-  staffId: string;
 }): Promise<Order[]> => {
   try {
     const startDate = new Date(start);
@@ -29,4 +28,36 @@ const getOrdersService = async ({
   }
 };
 
-export { getOrdersService };
+const saveCommissionPlanService = async ({
+  commissions,
+  staffMemberId,
+}: {
+  commissions: {
+    percentage: number;
+    productId: string;
+    orderId: string;
+  }[];
+  staffMemberId: string;
+}): Promise<any> => {
+  try {
+    commissions.forEach(async (commission) => {
+      await prisma.commission.create({
+        data: {
+          percentage: commission.percentage,
+          productId: commission.productId,
+        },
+      });
+      await prisma.order.update({
+        where: { id: commission.orderId },
+        data: {
+          staffMemberId,
+        },
+      });
+    });
+    return true;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export { getOrdersService, saveCommissionPlanService };

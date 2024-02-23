@@ -19,7 +19,7 @@ services:
     ports:
       - "3000:3000"
     environment:
-      NEXT_PUBLIC_DATABASE_URL: postgres://easyteam:easyteampass@postgres:5432/easyteamdb
+      NEXT_PUBLIC_API_BASE_URL: postgres://easyteam:easyteampass@localhost:5432/easyteamdb
 
   # Node.js Backend
   backend:
@@ -27,7 +27,7 @@ services:
     ports:
       - "5000:5000"
     environment:
-      DATABASE_URL: postgres://easyteam:easyteampass@postgres:5432/easyteamdb
+      DATABASE_URL: postgres://easyteam:easyteampass@localhost:5432/easyteamdb
 
 volumes:
   postgres_data:

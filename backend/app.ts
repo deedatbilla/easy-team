@@ -14,6 +14,7 @@ app.set("trust proxy", true);
 app.get("/products", productsController.getProducts);
 app.post("/orders", ordersController.getOrders);
 app.get("/staffMembers", staffMembersController.getStaffMembers);
+app.post("/saveCommissionPlan", ordersController.saveCommissionPlan);
 
 app.listen(PORT, () => {
   console.log(`Server listening on port ${PORT}`);

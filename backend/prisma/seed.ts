@@ -7,27 +7,6 @@ async function clearDatabase() {
   await prisma.product.deleteMany();
   await prisma.staffMember.deleteMany();
 }
-async function createProducts(): Promise<void> {
-  for (let i = 0; i < 10; i++) {
-    await prisma.product.create({
-      data: {
-        name: faker.commerce.productName(),
-        price: Number(faker.commerce.price()),
-        category: faker.commerce.department(),
-        imageUrl: faker.image.avatar(),
-      },
-    });
-  }
-}
-async function createStaffMembers(): Promise<void> {
-  for (let i = 0; i < 5; i++) {
-    await prisma.staffMember.create({
-      data: {
-        name: faker.person.fullName(),
-      },
-    });
-  }
-}
 
 // async function main() {
 //   clearDatabase();
@@ -57,7 +36,7 @@ async function main() {
   await Promise.all(
     Array.from({ length: 1000 }).map(async () => {
       const orderName = faker.commerce.department();
-      const staffMemberId = faker.helpers.arrayElement(staffMembers).id;
+      // const staffMemberId = faker.helpers.arrayElement(staffMembers).id;
       const products = await Promise.all(
         Array.from({ length: faker.number.int({ min: 1, max: 5 }) }).map(
           async () => {
@@ -79,7 +58,6 @@ async function main() {
       const order = await prisma.order.create({
         data: {
           orderName,
-          staffMemberId,
           products: {
             connect: products.map((product) => ({ id: product.id })),
           },

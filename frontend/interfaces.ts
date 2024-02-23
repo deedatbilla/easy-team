@@ -4,6 +4,10 @@ export interface Product {
   id: string;
   imageUrl: string;
   category: string;
+  discountedPrice: number;
+  percentageValue: number;
+  commission: number;
+  orderId: string;
 }
 export interface StaffMember {
   id: string;
@@ -15,7 +19,7 @@ export interface Order {
   products: Product[];
   createdAt: string;
 }
-export interface DailyCommissions{
-    day:string
-    orders:Order[]
+export interface DailyCommissions {
+  day: string;
+  orders: Order[];
 }

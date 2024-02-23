@@ -27,14 +27,13 @@ model Product {
 }
 
 model Order {
-  id                 String       @id @default(cuid())
-  orderName          String
-  products           Product[]
-  productCommissions Commission[]
-  staffMember        StaffMember? @relation(fields: [staffMemberId], references: [id])
-  staffMemberId      String?
-  createdAt          DateTime
-  updatedAt          DateTime     @updatedAt @map("updated_at")
+  id            String       @id @default(cuid())
+  orderName     String
+  products      Product[]
+  staffMember   StaffMember? @relation(fields: [staffMemberId], references: [id])
+  staffMemberId String?
+  createdAt     DateTime
+  updatedAt     DateTime     @updatedAt @map("updated_at")
 }
 
 model Commission {
@@ -42,8 +41,6 @@ model Commission {
   product    Product? @relation(fields: [productId], references: [id])
   percentage Float
   productId  String?
-  order      Order?   @relation(fields: [orderId], references: [id])
-  orderId    String?
   createdAt  DateTime @default(now()) @map("created_at")
   updatedAt  DateTime @updatedAt @map("updated_at")
 }

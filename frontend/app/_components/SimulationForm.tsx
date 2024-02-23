@@ -1,5 +1,5 @@
 import { AxiosHost } from "@/axiosGlobal";
-import { DailyCommissions, Order, StaffMember } from "@/interfaces";
+import { DailyCommissions, Order, Product, StaffMember } from "@/interfaces";
 import {
   BlockStack,
   Box,
@@ -20,7 +20,15 @@ import React, { useEffect, useRef, useState } from "react";
 import _ from "lodash";
 import DailyCommissionsTable from "./DailyCommissionsTable";
 
-function SimulationForm({ staffMembers }: { staffMembers: StaffMember[] }) {
+function SimulationForm({
+  staffMembers,
+  selectedResources,
+  products,
+}: {
+  staffMembers: StaffMember[];
+  selectedResources: string[];
+  products: Product[];
+}) {
   const { mdDown, lgUp } = useBreakpoints();
   const shouldShowMultiMonth = lgUp;
   const today = new Date(new Date().setHours(0, 0, 0, 0));
@@ -57,7 +65,7 @@ function SimulationForm({ staffMembers }: { staffMembers: StaffMember[] }) {
   ];
   const [popoverActive, setPopoverActive] = useState(false);
   const [activeDateRange, setActiveDateRange] = useState(ranges[0]);
-  const [inputValues, setInputValues] = useState({});
+  const [inputValues, setInputValues] = useState<any>({});
   const [{ month, year }, setDate] = useState({
     month: activeDateRange.period.since.getMonth(),
     year: activeDateRange.period.since.getFullYear(),
@@ -118,7 +126,7 @@ function SimulationForm({ staffMembers }: { staffMembers: StaffMember[] }) {
       : false;
   }
   function handleStartInputValueChange(value: any) {
-    setInputValues((prevState) => {
+    setInputValues((prevState: any) => {
       return { ...prevState, since: value };
     });
     console.log("handleStartInputValueChange, validDate", value);
@@ -137,7 +145,7 @@ function SimulationForm({ staffMembers }: { staffMembers: StaffMember[] }) {
     }
   }
   function handleEndInputValueChange(value: any) {
-    setInputValues((prevState) => ({ ...prevState, until: value }));
+    setInputValues((prevState: any) => ({ ...prevState, until: value }));
     if (isValidDate(value)) {
       const newUntil = parseYearMonthDayDateString(value);
       setActiveDateRange((prevState) => {
@@ -239,7 +247,9 @@ function SimulationForm({ staffMembers }: { staffMembers: StaffMember[] }) {
         start: new Date(since).toISOString(),
         end: new Date(until).toISOString(),
       });
-      const groupedOrders = _.groupBy(data.orders, "createdAt");
+
+      const sortedData = _.orderBy(data.orders, ["createdAt"], ["desc"]);
+      const groupedOrders = _.groupBy(sortedData, "createdAt");
       const items: DailyCommissions[] = [];
       Object.entries(groupedOrders).forEach(([key, value]) => {
         items.push({
@@ -256,9 +266,13 @@ function SimulationForm({ staffMembers }: { staffMembers: StaffMember[] }) {
       setLoading(false);
     }
   };
-
+  const [selectedStaff, setSelectedStaff] = useState(staffMembers?.[0]?.id);
   const handleSimulate = () => {
     try {
+      if (!selectedStaff) {
+        alert("Please select a staff member");
+        return;
+      }
       fetchOrders();
     } catch (error) {}
   };
@@ -287,98 +301,105 @@ function SimulationForm({ staffMembers }: { staffMembers: StaffMember[] }) {
           onClose={() => setPopoverActive(false)}
         >
           <Popover.Pane fixed>
-            <InlineGrid
-              columns={{
-                xs: "1fr",
+            <div ref={datePickerRef}>
+              <InlineGrid
+                columns={{
+                  xs: "1fr",
 
-                md: "max-content max-content",
-              }}
-              ref={datePickerRef}
-            >
-              <Box
-                maxWidth={mdDown ? "516px" : "212px"}
-                width={mdDown ? "100%" : "212px"}
-                padding={{ xs: 500, md: 0 }}
-                paddingBlockEnd={{ xs: 100, md: 0 }}
+                  md: "max-content max-content",
+                }}
               >
-                {mdDown ? (
-                  <Select
-                    label="dateRangeLabel"
-                    labelHidden
-                    onChange={(value) => {
-                      const result = ranges.find(
-                        ({ title, alias }) => title === value || alias === value
-                      );
-                      setActiveDateRange(result);
-                    }}
-                    value={
-                      activeDateRange?.title || activeDateRange?.alias || ""
-                    }
-                    options={ranges.map(({ alias, title }) => title || alias)}
-                  />
-                ) : (
-                  <Scrollable style={{ height: "334px" }}>
-                    <OptionList
-                      options={ranges.map((range) => ({
-                        value: range.alias,
-                        label: range.title,
-                      }))}
-                      selected={activeDateRange.alias}
+                <Box
+                  maxWidth={mdDown ? "516px" : "212px"}
+                  width={mdDown ? "100%" : "212px"}
+                  padding={{ xs: "500", md: "0" }}
+                  paddingBlockEnd={{ xs: "100", md: "0" }}
+                >
+                  {mdDown ? (
+                    <Select
+                      label="dateRangeLabel"
+                      labelHidden
                       onChange={(value) => {
-                        setActiveDateRange(
-                          ranges.find((range) => range.alias === value[0])
+                        const result = ranges.find(
+                          ({ title, alias }) =>
+                            title === value || alias === value
                         );
+                        setActiveDateRange(result as any);
                       }}
+                      value={
+                        activeDateRange?.title || activeDateRange?.alias || ""
+                      }
+                      options={ranges.map(({ alias, title }) => title || alias)}
                     />
-                  </Scrollable>
-                )}
-              </Box>
-              <Box padding={{ xs: 500 }} maxWidth={mdDown ? "320px" : "516px"}>
-                <BlockStack gap="400">
-                  <InlineStack gap="200">
-                    <div style={{ flexGrow: 1 }}>
-                      <TextField
-                        role="combobox"
-                        label={"Since"}
-                        labelHidden
-                        prefix={<Icon source={CalendarIcon} />}
-                        value={inputValues.since}
-                        onChange={handleStartInputValueChange}
-                        onBlur={handleInputBlur}
-                        autoComplete="off"
+                  ) : (
+                    <Scrollable style={{ height: "334px" }}>
+                      <OptionList
+                        options={ranges.map((range) => ({
+                          value: range.alias,
+                          label: range.title,
+                        }))}
+                        selected={activeDateRange.alias as any}
+                        onChange={(value) => {
+                          setActiveDateRange(
+                            ranges.find(
+                              (range) => range.alias === value[0]
+                            ) as any
+                          );
+                        }}
+                      />
+                    </Scrollable>
+                  )}
+                </Box>
+                <Box
+                  padding={{ xs: "500" }}
+                  maxWidth={mdDown ? "320px" : "516px"}
+                >
+                  <BlockStack gap="400">
+                    <InlineStack gap="200">
+                      <div style={{ flexGrow: 1 }}>
+                        <TextField
+                          role="combobox"
+                          label={"Since"}
+                          labelHidden
+                          prefix={<Icon source={CalendarIcon} />}
+                          value={inputValues.since}
+                          onChange={handleStartInputValueChange}
+                          onBlur={handleInputBlur}
+                          autoComplete="off"
+                        />
+                      </div>
+                      <Icon source={ArrowRightIcon} />
+                      <div style={{ flexGrow: 1 }}>
+                        <TextField
+                          role="combobox"
+                          label={"Until"}
+                          labelHidden
+                          prefix={<Icon source={CalendarIcon} />}
+                          value={inputValues.until}
+                          onChange={handleEndInputValueChange}
+                          onBlur={handleInputBlur}
+                          autoComplete="off"
+                        />
+                      </div>
+                    </InlineStack>
+                    <div>
+                      <DatePicker
+                        month={month}
+                        year={year}
+                        selected={{
+                          start: activeDateRange.period.since,
+                          end: activeDateRange.period.until,
+                        }}
+                        onMonthChange={handleMonthChange}
+                        onChange={handleCalendarChange}
+                        multiMonth={shouldShowMultiMonth}
+                        allowRange
                       />
                     </div>
-                    <Icon source={ArrowRightIcon} />
-                    <div style={{ flexGrow: 1 }}>
-                      <TextField
-                        role="combobox"
-                        label={"Until"}
-                        labelHidden
-                        prefix={<Icon source={CalendarIcon} />}
-                        value={inputValues.until}
-                        onChange={handleEndInputValueChange}
-                        onBlur={handleInputBlur}
-                        autoComplete="off"
-                      />
-                    </div>
-                  </InlineStack>
-                  <div>
-                    <DatePicker
-                      month={month}
-                      year={year}
-                      selected={{
-                        start: activeDateRange.period.since,
-                        end: activeDateRange.period.until,
-                      }}
-                      onMonthChange={handleMonthChange}
-                      onChange={handleCalendarChange}
-                      multiMonth={shouldShowMultiMonth}
-                      allowRange
-                    />
-                  </div>
-                </BlockStack>
-              </Box>
-            </InlineGrid>
+                  </BlockStack>
+                </Box>
+              </InlineGrid>
+            </div>
           </Popover.Pane>
           <Popover.Pane fixed>
             <Popover.Section>
@@ -390,19 +411,28 @@ function SimulationForm({ staffMembers }: { staffMembers: StaffMember[] }) {
           </Popover.Pane>
         </Popover>
         <Select
-          label="Date range"
+          label=""
           options={staffMembers.map((item) => ({
             value: item.id,
             label: item.name,
           }))}
-          onChange={() => {}}
-          //   value={selected}
+          onChange={(value) => {
+            setSelectedStaff(value);
+          }}
+          value={selectedStaff}
         />
-        <Button onClick={handleSimulate}>Simulate</Button>
+        <Button loading={loading} onClick={handleSimulate}>
+          Simulate
+        </Button>
       </div>
 
       <div>
-        <DailyCommissionsTable dailyCommissions={dailyCommissions} />
+        <DailyCommissionsTable
+          selectedResources={selectedResources}
+          dailyCommissions={dailyCommissions}
+          products={products}
+          selectedStaff={selectedStaff}
+        />
       </div>
     </div>
   );
