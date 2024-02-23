@@ -1,55 +1,26 @@
-Here's a README.md file for your project:
+## Project Readme
 
-```markdown
-# Project Name
+This document provides an overview of the project structure and how to run it locally.
 
-## Overview
+**Project Structure:**
 
-This project consists of a backend Node.js/Express application and a frontend Next.js application. The backend utilizes Prisma as the ORM for database interactions.
+* **backend:** This directory contains the Node.js/Express app backend with Prisma integration.
+* **frontend:** This directory contains the Next.js frontend application.
+* **docker-compose.yml:** This file defines the docker configuration for running the database, backend, and frontend services together.
 
-## Backend
+**Backend:**
 
-The backend directory contains a Node.js/Express application. Prisma is used for database operations. To seed the database, run the following command:
+* The backend uses Node.js and Express for server-side logic.
+* Prisma is used as the ORM (Object-Relational Mapper) for interacting with the database.
+* To seed the database with initial data, run the command `npm prisma db seed`.
+* To start the backend server in development mode, run the command `npm run dev`.
 
-```bash
-npm run prisma db seed
-```
+**Frontend:**
 
-To run the backend server locally, use the following command:
+* The frontend is built using Next.js for a smooth and performant user experience.
+* You can learn more about Next.js on their website: [https://nextjs.org/](https://nextjs.org/).
 
-```bash
-npm run dev
-```
+**Docker Compose:**
 
-## Frontend
-
-The frontend directory contains a Next.js application. This directory houses the code for the client-side of the application.
-
-## Docker Compose
-
-At the root of the project, there's a Docker Compose file (`docker-compose.yml`) that sets up the following services:
-
-- PostgreSQL database
-- Backend (Node.js/Express)
-- Frontend (Next.js)
-
-To start the Docker containers, run the following command:
-
-```bash
-docker-compose up -d
-```
-
-## Usage
-
-1. Clone this repository.
-2. Navigate to the root directory of the project.
-3. Set up environment variables as needed.
-4. Start the Docker containers using `docker-compose up`.
-5. Access the frontend application at [http://localhost:3000](http://localhost:3000).
-
-## License
-
-This project is licensed under the [MIT License](LICENSE).
-```
-
-Feel free to customize the descriptions or add additional sections as needed!
+* Docker Compose orchestrates the backend, frontend, and database services in separate containers.
+* To run all services in development mode, simply run the command `docker-compose up`.

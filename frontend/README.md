@@ -1,33 +1,36 @@
-## Project Readme
+This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
 
-This document provides an overview of the project structure and how to run it locally.
+## Getting Started
 
-**Project Structure:**
+First, run the development server:
 
-* **backend:** This directory contains the Node.js/Express app backend with Prisma integration.
-* **frontend:** This directory contains the Next.js frontend application.
-* **docker-compose.yml:** This file defines the docker configuration for running the database, backend, and frontend services together.
+```bash
+npm run dev
+# or
+yarn dev
+# or
+pnpm dev
+# or
+bun dev
+```
 
-**Backend:**
+Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-* The backend uses Node.js and Express for server-side logic.
-* Prisma is used as the ORM (Object-Relational Mapper) for interacting with the database.
-* To seed the database with initial data, run the command `npm prisma db seed`.
-* To start the backend server in development mode, run the command `npm run dev`.
+You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
-**Frontend:**
+This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
 
-* The frontend is built using Next.js for a smooth and performant user experience.
-* You can learn more about Next.js on their website: [https://nextjs.org/](https://nextjs.org/).
+## Learn More
 
-**Docker Compose:**
+To learn more about Next.js, take a look at the following resources:
 
-* Docker Compose orchestrates the backend, frontend, and database services in separate containers.
-* To run all services in development mode, simply run the command `docker-compose up`.
+- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
+- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
 
-**Development Notes:**
+You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
 
-* Make sure you have Docker and Docker Compose installed before proceeding.
-* Adjust environment variables and configuration settings as needed based on your local environment.
-* For any further questions or specific development instructions, refer to the individual backend and frontend code comments or README files within their respective directories.
+## Deploy on Vercel
 
+The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+
+Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
