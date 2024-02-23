@@ -1,6 +1,6 @@
 "use client";
 import { AxiosHost } from "@/axiosGlobal";
-import { Product } from "@/interfaces";
+import { Product, StaffMember } from "@/interfaces";
 import {
   TextField,
   IndexTable,
@@ -18,19 +18,14 @@ import {
 } from "@shopify/polaris";
 import type { IndexFiltersProps, TabProps } from "@shopify/polaris";
 import { useState, useCallback, useEffect } from "react";
+import SimulationForm from "./_components/SimulationForm.tsx";
 const pageSize = 10;
 export default function Home() {
   const sleep = (ms: number) =>
     new Promise((resolve) => setTimeout(resolve, ms));
-  const [itemStrings, setItemStrings] = useState([
-    "All",
-    "Unpaid",
-    "Open",
-    "Closed",
-    "Local delivery",
-    "Local pickup",
-  ]);
+
   const [allProducts, setAllProducts] = useState<any[]>([]);
+  const [products, setProducts] = useState<any[]>([]);
   const [displayedData, setDisplayedData] = useState<any[]>([]);
   const [limit, setLimit] = useState(10);
   const [offset, setOffset] = useState(0);
@@ -47,7 +42,7 @@ export default function Home() {
   };
   const [totalPages, setTotalPages] = useState(0);
   useEffect(() => {
-    const displayedData = allProducts.slice(offset, limit);
+    const displayedData = products.slice(offset, limit);
     setDisplayedData(displayedData);
   }, [limit, offset]);
 
@@ -60,84 +55,20 @@ export default function Home() {
       setLimit(newLimit);
     }
   };
-  const deleteView = (index: number) => {
-    const newItemStrings = [...itemStrings];
-    newItemStrings.splice(index, 1);
-    setItemStrings(newItemStrings);
-    setSelected(0);
-  };
 
-  const duplicateView = async (name: string) => {
-    setItemStrings([...itemStrings, name]);
-    setSelected(itemStrings.length);
-    await sleep(1);
-    return true;
-  };
-
-  const tabs: TabProps[] = itemStrings.map((item, index) => ({
-    content: item,
-    index,
-    onAction: () => {},
-    id: `${item}-${index}`,
-    isLocked: index === 0,
-    actions:
-      index === 0
-        ? []
-        : [
-            {
-              type: "rename",
-              onAction: () => {},
-              onPrimaryAction: async (value: string): Promise<boolean> => {
-                const newItemsStrings = tabs.map((item, idx) => {
-                  if (idx === index) {
-                    return value;
-                  }
-                  return item.content;
-                });
-                await sleep(1);
-                setItemStrings(newItemsStrings);
-                return true;
-              },
-            },
-            {
-              type: "duplicate",
-              onPrimaryAction: async (value: string): Promise<boolean> => {
-                await sleep(1);
-                duplicateView(value);
-                return true;
-              },
-            },
-            {
-              type: "edit",
-            },
-            {
-              type: "delete",
-              onPrimaryAction: async () => {
-                await sleep(1);
-                deleteView(index);
-                return true;
-              },
-            },
-          ],
-  }));
   const [selected, setSelected] = useState(0);
-  const { selectedResources, allResourcesSelected, handleSelectionChange } =
-    useIndexResourceState(allProducts);
-  const onCreateNewView = async (value: string) => {
-    await sleep(500);
-    setItemStrings([...itemStrings, value]);
-    setSelected(itemStrings.length);
-    return true;
-  };
+  const {
+    selectedResources,
+    allResourcesSelected,
+    handleSelectionChange,
+    clearSelection,
+  } = useIndexResourceState(allProducts);
+
   const sortOptions: IndexFiltersProps["sortOptions"] = [
-    { label: "Category", value: "order asc", directionLabel: "Ascending" },
-    { label: "Order", value: "order desc", directionLabel: "Descending" },
-    { label: "Customer", value: "customer asc", directionLabel: "A-Z" },
-    { label: "Customer", value: "customer desc", directionLabel: "Z-A" },
-    { label: "Date", value: "date asc", directionLabel: "A-Z" },
-    { label: "Date", value: "date desc", directionLabel: "Z-A" },
-    { label: "Total", value: "total asc", directionLabel: "Ascending" },
-    { label: "Total", value: "total desc", directionLabel: "Descending" },
+    { label: "Category", value: "category asc", directionLabel: "Ascending" },
+    { label: "Category", value: "category desc", directionLabel: "Descending" },
+    { label: "Category", value: "category asc", directionLabel: "A-Z" },
+    { label: "Category", value: "category desc", directionLabel: "Z-A" },
   ];
   const promotedBulkActions = [
     {
@@ -146,15 +77,16 @@ export default function Home() {
         const updated = [...allProducts];
         updated.forEach((el) => {
           if (selectedResources.some((r) => r === el?.id)) {
-            el.price = el.price - (el.price * Number(discount)) / 100;
-            el.discount = discount;
+            el.discountedPrice = el.price - (el.price * Number(discount)) / 100;
+            el.percentageValue = discount;
           }
         });
         setAllProducts(updated);
+        clearSelection();
       },
     },
   ];
-  const [sortSelected, setSortSelected] = useState(["order asc"]);
+  const [sortSelected, setSortSelected] = useState(["category asc"]);
   const { mode, setMode } = useSetIndexFiltersMode();
   const onHandleCancel = () => {};
 
@@ -163,67 +95,34 @@ export default function Home() {
     return true;
   };
 
-  const primaryAction: IndexFiltersProps["primaryAction"] =
-    selected === 0
-      ? {
-          type: "save-as",
-          onAction: onCreateNewView,
-          disabled: false,
-          loading: false,
-        }
-      : {
-          type: "save",
-          onAction: onHandleSave,
-          disabled: false,
-          loading: false,
-        };
-  const [accountStatus, setAccountStatus] = useState<string[] | undefined>(
+  const [productCategory, setProductCategory] = useState<string[] | undefined>(
     undefined
   );
-  const [moneySpent, setMoneySpent] = useState<[number, number] | undefined>(
-    undefined
-  );
-  const [taggedWith, setTaggedWith] = useState("");
   const [queryValue, setQueryValue] = useState("");
 
-  const handleAccountStatusChange = useCallback(
-    (value: string[]) => setAccountStatus(value),
-    []
-  );
-  const handleMoneySpentChange = useCallback(
-    (value: [number, number]) => setMoneySpent(value),
-    []
-  );
-  const handleTaggedWithChange = useCallback(
-    (value: string) => setTaggedWith(value),
-    []
-  );
+  const handleProductCategoryChange = useCallback((value: string[]) => {
+    setProductCategory(value);
+    const filtered = allProducts.filter((product) =>
+      value.some((category) => product.category.includes(category))
+    );
+    setProducts(filtered);
+  }, []);
+
   const handleFiltersQueryChange = useCallback(
     (value: string) => setQueryValue(value),
     []
   );
-  const handleAccountStatusRemove = useCallback(
-    () => setAccountStatus(undefined),
+  const handleProductCategoryRemove = useCallback(
+    () => setProductCategory(undefined),
     []
   );
-  const handleMoneySpentRemove = useCallback(
-    () => setMoneySpent(undefined),
-    []
-  );
-  const handleTaggedWithRemove = useCallback(() => setTaggedWith(""), []);
+
   const handleQueryValueRemove = useCallback(() => setQueryValue(""), []);
   const handleFiltersClearAll = useCallback(() => {
-    handleAccountStatusRemove();
-    handleMoneySpentRemove();
-    handleTaggedWithRemove();
+    handleProductCategoryRemove();
     handleQueryValueRemove();
-  }, [
-    handleAccountStatusRemove,
-    handleMoneySpentRemove,
-    handleQueryValueRemove,
-    handleTaggedWithRemove,
-  ]);
-
+  }, [handleProductCategoryRemove, handleQueryValueRemove]);
+  const [staffMembers, setStaffMembers] = useState<StaffMember[]>([]);
   const fetchProducts = async () => {
     try {
       setLoading(true);
@@ -237,7 +136,19 @@ export default function Home() {
       const totalPages = Math.ceil(all.length / pageSize);
       setTotalPages(totalPages);
       setDisplayedData(initialData);
+      setProducts(all);
       setAllProducts(all);
+      setLoading(false);
+    } catch (error) {
+      console.log(error);
+      setLoading(false);
+    }
+  };
+  const fetchStaffMembers = async () => {
+    try {
+      setLoading(true);
+      const { data } = await AxiosHost.get("/staffMembers");
+      setStaffMembers(data.staff);
       setLoading(false);
     } catch (error) {
       console.log(error);
@@ -247,12 +158,51 @@ export default function Home() {
 
   useEffect(() => {
     fetchProducts();
+    fetchStaffMembers();
   }, []);
 
   const resourceName = {
     singular: "product",
     plural: "products",
   };
+  const filters = [
+    {
+      key: "category",
+      label: "Product category",
+      filter: (
+        <ChoiceList
+          title="Product category"
+          titleHidden
+          choices={Array.from(
+            allProducts.reduce((categorySet, product) => {
+              categorySet.add(product.category);
+              return categorySet;
+            }, new Set())
+          ).map((category: any) => ({ label: category, value: category }))}
+          selected={productCategory || []}
+          onChange={handleProductCategoryChange}
+          allowMultiple
+        />
+      ),
+      shortcut: true,
+    },
+  ];
+  function isEmpty(value: string | string[]): boolean {
+    if (Array.isArray(value)) {
+      return value.length === 0;
+    } else {
+      return value === "" || value == null;
+    }
+  }
+  const appliedFilters: IndexFiltersProps["appliedFilters"] = [];
+  if (productCategory && !isEmpty(productCategory)) {
+    const key = "category";
+    appliedFilters.push({
+      key,
+      label: productCategory.map((val) => `Category ${val}`).join(", "),
+      onRemove: handleProductCategoryRemove,
+    });
+  }
 
   const rowMarkup = displayedData.map(
     (
@@ -290,7 +240,6 @@ export default function Home() {
               newProducts[index].percentageValue = value;
               newProducts[index].discountedPrice =
                 price - (price * Number(value)) / 100;
-              console.log(newProducts[index]);
               setAllProducts(newProducts);
             }}
             autoComplete="off"
@@ -317,7 +266,6 @@ export default function Home() {
           onQueryChange={handleFiltersQueryChange}
           onQueryClear={() => setQueryValue("")}
           onSort={setSortSelected}
-          primaryAction={primaryAction}
           cancelAction={{
             onAction: onHandleCancel,
             disabled: false,
@@ -327,9 +275,8 @@ export default function Home() {
           selected={selected}
           onSelect={setSelected}
           canCreateNewView
-          onCreateNewView={onCreateNewView}
-          filters={[]}
-          appliedFilters={[]}
+          filters={filters}
+          appliedFilters={appliedFilters}
           onClearAll={handleFiltersClearAll}
           mode={mode}
           setMode={setMode}
@@ -377,6 +324,10 @@ export default function Home() {
           />
         )}
       </LegacyCard>
+
+      <div>
+        <SimulationForm staffMembers={staffMembers} />
+      </div>
     </div>
   );
 }
