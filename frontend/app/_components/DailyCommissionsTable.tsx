@@ -71,22 +71,17 @@ export default function DailyCommissionsTable({
       const filtered: Product[] = products.filter(
         (item) => item.commission > 0
       );
+
       const commissionProducts = filtered.map((item) => ({
         percentage: Number(item.percentageValue),
         productId: item.id,
-        orderId: item.orderId,
       }));
-
-      //batch request data to prevent request entity too large error
-      const batchedProducts = _.chunk(commissionProducts, 300);
-      await Promise.allSettled(
-        batchedProducts.map(async (batch) => {
-          await AxiosHost.post("saveCommissionPlan", {
-            commissions: batch,
-            staffMemberId: selectedStaff,
-          });
-        })
-      );
+      const orders = products.flatMap((product) => product.orders);
+      await AxiosHost.post("saveCommissionPlan", {
+        commissions: commissionProducts,
+        staffMemberId: selectedStaff,
+        orders,
+      });
 
       alert("Commission plan saved successfully");
       setSaving(false);

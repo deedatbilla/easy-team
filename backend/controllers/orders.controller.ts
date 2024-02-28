@@ -24,10 +24,11 @@ export const ordersController = {
   },
   saveCommissionPlan: async (request: Request, response: Response) => {
     try {
-      const { commissions, staffMemberId } = request.body;
+      const { commissions, staffMemberId, orders } = request.body;
       const newCommissions = await saveCommissionPlanService({
         commissions,
         staffMemberId,
+        orders,
       });
       response.status(200).json({
         status: 200,

@@ -20,9 +20,9 @@ const getOrdersService = async ({
       },
       include: {
         products: {
-          select:{
-            product:true
-          }
+          select: {
+            product: true,
+          },
         },
       },
     });
@@ -35,10 +35,13 @@ const getOrdersService = async ({
 const saveCommissionPlanService = async ({
   commissions,
   staffMemberId,
+  orders,
 }: {
   commissions: {
     percentage: number;
     productId: string;
+  }[];
+  orders: {
     orderId: string;
   }[];
   staffMemberId: string;
@@ -51,8 +54,10 @@ const saveCommissionPlanService = async ({
           productId: commission.productId,
         },
       });
+    });
+    orders.forEach(async (order) => {
       await prisma.order.update({
-        where: { id: commission.orderId },
+        where: { id: order.orderId },
         data: {
           staffMemberId,
         },

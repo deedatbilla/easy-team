@@ -7,8 +7,8 @@ export interface Product {
   discountedPrice: number;
   percentageValue: number;
   commission: number;
-  orderId: string;
   product: Product;
+  orders:Order[]
 }
 export interface StaffMember {
   id: string;
@@ -19,6 +19,8 @@ export interface Order {
   orderName: string;
   products: Product[];
   createdAt: string;
+  orderId:string;
+  productId:string
 }
 export interface DailyCommissions {
   day: string;
