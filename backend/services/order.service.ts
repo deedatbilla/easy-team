@@ -19,7 +19,11 @@ const getOrdersService = async ({
         },
       },
       include: {
-        products: true,
+        products: {
+          select:{
+            product:true
+          }
+        },
       },
     });
     return orders;

@@ -14,26 +14,35 @@ datasource db {
 }
 
 model Product {
-  id          String       @id @default(cuid())
-  createdAt   DateTime     @default(now()) @map("created_at")
-  updatedAt   DateTime     @updatedAt @map("updated_at")
+  id          String             @id @default(cuid())
+  createdAt   DateTime           @default(now()) @map("created_at")
+  updatedAt   DateTime           @updatedAt @map("updated_at")
   name        String
   price       Float
   category    String
-  Order       Order?       @relation(fields: [orderId], references: [id])
-  orderId     String?
+  orders      ProductsOnOrders[]
   commissions Commission[]
   imageUrl    String
 }
 
 model Order {
-  id            String       @id @default(cuid())
+  id            String             @id @default(cuid())
   orderName     String
-  products      Product[]
-  staffMember   StaffMember? @relation(fields: [staffMemberId], references: [id])
+  products      ProductsOnOrders[]
+  staffMember   StaffMember?       @relation(fields: [staffMemberId], references: [id])
   staffMemberId String?
   createdAt     DateTime
-  updatedAt     DateTime     @updatedAt @map("updated_at")
+  updatedAt     DateTime           @updatedAt @map("updated_at")
+}
+
+model ProductsOnOrders {
+  product    Product  @relation(fields: [productId], references: [id])
+  productId  String
+  order      Order    @relation(fields: [orderId], references: [id])
+  orderId    String
+  assignedAt DateTime @default(now())
+
+  @@id([productId, orderId])
 }
 
 model Commission {

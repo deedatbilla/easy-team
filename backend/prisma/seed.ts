@@ -6,6 +6,7 @@ async function clearDatabase() {
   await prisma.order.deleteMany();
   await prisma.product.deleteMany();
   await prisma.staffMember.deleteMany();
+  await prisma.productsOnOrders.deleteMany();
 }
 
 // async function main() {
@@ -58,11 +59,15 @@ async function main() {
       const order = await prisma.order.create({
         data: {
           orderName,
-          products: {
-            connect: products.map((product) => ({ id: product.id })),
-          },
           createdAt: faker.date.past(),
         },
+      });
+      const productsOnOrders = products.map((product) => ({
+        productId: product.id,
+        orderId: order.id,
+      }));
+      await prisma.productsOnOrders.createMany({
+        data: productsOnOrders,
       });
 
       // await Promise.all(

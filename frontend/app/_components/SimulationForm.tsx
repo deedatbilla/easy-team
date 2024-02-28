@@ -266,7 +266,12 @@ function SimulationForm({
       setLoading(false);
     }
   };
-  const [selectedStaff, setSelectedStaff] = useState(staffMembers?.[0]?.id);
+  const [selectedStaff, setSelectedStaff] = useState("");
+
+  useEffect(() => {
+    setSelectedStaff(staffMembers?.[0]?.id);
+  }, [staffMembers]);
+
   const handleSimulate = () => {
     try {
       if (!selectedStaff) {

@@ -8,6 +8,7 @@ export interface Product {
   percentageValue: number;
   commission: number;
   orderId: string;
+  product: Product;
 }
 export interface StaffMember {
   id: string;

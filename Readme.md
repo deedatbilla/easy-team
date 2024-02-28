@@ -12,7 +12,7 @@ This document provides an overview of the project structure and how to run it lo
 
 * The backend uses Node.js and Express for server-side logic.
 * Prisma is used as the ORM (Object-Relational Mapper) for interacting with the database.
-* To seed the database with initial data, run the command `npm prisma db seed`.
+* To seed the database with initial data, run the command `npx prisma db seed`.
 * To start the backend server in development mode, run the command `npm run dev`.
 
 **Frontend:**

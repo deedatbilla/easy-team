@@ -2,31 +2,30 @@ import { AxiosHost } from "@/axiosGlobal";
 import { DailyCommissions, Product } from "@/interfaces";
 import { Page, LegacyCard, DataTable, Button } from "@shopify/polaris";
 import React, { useEffect, useMemo, useState } from "react";
-
+import _ from "lodash";
 export default function DailyCommissionsTable({
   dailyCommissions,
   selectedResources,
   products,
-  selectedStaff
+  selectedStaff,
 }: {
   dailyCommissions: DailyCommissions[];
   selectedResources: string[];
   products: Product[];
-  selectedStaff:string
+  selectedStaff: string;
 }) {
   const [limit, setLimit] = useState(10);
   const [offset, setOffset] = useState(0);
-  console.log({ dailyCommissions, products });
   const computedRowsData = useMemo(() => {
     return dailyCommissions.map((dailyCommission) => {
       const ordersCount = dailyCommission.orders.length;
       const allProducts: Product[] = [];
       dailyCommission.orders.forEach((order) => {
         order.products.forEach((product) => {
-          allProducts.push(product);
+          allProducts.push(product.product);
         });
       });
-      const relatedProducts = products.filter((item: Product) =>
+      const relatedProducts = products.filter((item: any) =>
         allProducts.some((s: Product) => item.id === s.id)
       );
       const totalCommission = relatedProducts.reduce(
@@ -75,14 +74,20 @@ export default function DailyCommissionsTable({
       const commissionProducts = filtered.map((item) => ({
         percentage: Number(item.percentageValue),
         productId: item.id,
-        orderId:item.orderId
+        orderId: item.orderId,
       }));
-      const { data } = await AxiosHost.post("saveCommissionPlan", {
-        commissions: commissionProducts,
-        staffMemberId:selectedStaff
-       
-      });
-      console.log(data);
+
+      //batch request data to prevent request entity too large error
+      const batchedProducts = _.chunk(commissionProducts, 300);
+      await Promise.allSettled(
+        batchedProducts.map(async (batch) => {
+          await AxiosHost.post("saveCommissionPlan", {
+            commissions: batch,
+            staffMemberId: selectedStaff,
+          });
+        })
+      );
+
       alert("Commission plan saved successfully");
       setSaving(false);
     } catch (error) {
